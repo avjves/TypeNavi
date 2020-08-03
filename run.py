@@ -1,4 +1,5 @@
 from gui.tkinter_gui import TkinterGUI 
+import tkinter as tk
 import editdistance
 
 class Navigator:

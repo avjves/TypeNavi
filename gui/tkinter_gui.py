@@ -56,6 +56,15 @@ class TkinterGUI:
         Initializes all elements to be shown.
         """
         window = tk.Tk()
+        window.geometry("2560x1440")
+        #canvas = tk.Canvas(window, width = 2560, height=1440)
+        #canvas.pack()
+        img = tk.PhotoImage(file="placeholder.png")
+        bg = tk.Label(window, image=img)
+        bg.place(x=0,y=0, relwidth=1, relheight=1)
+        bg.image = img
+        #self.gui_instance.canvas.create_image(0,0, anchor=tk.NW, image=img)
+        #self.canvas = canvas
         label = tk.Label(window, text="Current search term:")
         label.pack()
         entry = tk.Entry(window)
