@@ -30,7 +30,7 @@ class TkinterGUI:
         """
         Returns the current search term.
         """
-        return self.search_term_entry.get()
+        return self.search_term_entry.get().lower()
 
     def highlight_term(self, term):
         """
