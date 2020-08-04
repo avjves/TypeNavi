@@ -4,6 +4,7 @@ class WxPythonGUI:
 
     def __init__(self):
         self.callbacks = {}
+        self.highlight_frames = []
 
     @staticmethod
     def initialize():
@@ -24,13 +25,14 @@ class WxPythonGUI:
         """
         Ends the mainloop of GUI, allowing the software to terminate.
         """
-        self.window.destroy()
+        self.remove_highlights()
+        self.search_frame.Close()
 
     def get_search_term(self):
         """
         Returns the current search term.
         """
-        return self.search_term_entry.get().lower()
+        return self.search_term_entry.GetValue().lower()
 
     def highlight_term(self, term):
         """
@@ -38,17 +40,32 @@ class WxPythonGUI:
         term = [word, position]
         """
         print("Highlighting :", term)
+        left, top, width, height = term[1]
+        self.remove_highlights()
+
+        frame = wx.Frame(None, pos=wx.Point(left, top), size=wx.Size(width, height), style=wx.BORDER_NONE)
+        #frame = wx.Frame(None, pos=wx.Point(x,y), size=wx.Size(width, height), style=wx.BORDER_NONE)
+        frame.SetBackgroundColour(wx.Colour(255, 128, 255))
+        frame.SetTransparent(500)
+        frame.Show()
+        self.highlight_frames.append(frame)
+
+        self.search_term_entry.SetFocus() # Keep focus on the search term frame
+
 
     def remove_highlights(self):
         """
         Removes all and any highlights that are currently on.
         """
-        pass
+        while self.highlight_frames:
+            frame = self.highlight_frames.pop(0)
+            frame.Close()
 
     def start(self):
         """
         Stars the mainloop of the GUI.
         """
+        self.search_frame.Show()
         self.app.MainLoop()
 
     def _initialize_elements(self):
@@ -56,34 +73,20 @@ class WxPythonGUI:
         Initializes all elements to be shown.
         """
         app = wx.App()
-        frame = wx.Frame(parent=None, title='Hello')
-        frame.Show()
+        frame = wx.Frame(None)
+        search_term_entry = wx.TextCtrl(frame, style=wx.TE_MULTILINE)
+        search_term_entry.Bind(wx.EVT_TEXT, self._on_press_key)
+        self.search_term_entry = search_term_entry
+        self.search_frame = frame
         self.app = app
-
-        # window.geometry("2560x1440")
-        # #canvas = tk.Canvas(window, width = 2560, height=1440)
-        # #canvas.pack()
-        # img = tk.PhotoImage(file="placeholder.png")
-        # bg = tk.Label(window, image=img)
-        # bg.place(x=0,y=0, relwidth=1, relheight=1)
-        # bg.image = img
-        # #self.gui_instance.canvas.create_image(0,0, anchor=tk.NW, image=img)
-        # #self.canvas = canvas
-        # label = tk.Label(window, text="Current search term:")
-        # label.pack()
-        # entry = tk.Entry(window)
-        # entry.bind("<KeyPress>", self._on_press_key)
-        # entry.pack()
-        # self.window = window
-        # self.search_term_entry = entry
-
 
     def _on_press_key(self, event):
         """
         Callback called whenever a key is pressed.
         Seperates Enter and rest of the keypresses to their own functions.
         """
-        if event.keycode == 36:
+        string = event.GetString()
+        if string and ord(string[-1]) == 10:
             self._on_press_enter()
         else:
             self._on_term_change()
