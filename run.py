@@ -1,4 +1,4 @@
-from gui.tkinter_gui import TkinterGUI 
+from gui.wxpython_gui import WxPythonGUI
 from ocr.tesseract import TesseractEngine
 import tkinter as tk
 import editdistance
@@ -6,7 +6,7 @@ import editdistance
 class Navigator:
 
     def __init__(self):
-        self.current_gui = TkinterGUI
+        self.current_gui = WxPythonGUI
         self.current_ocr_engine = TesseractEngine
         self.minimum_word_similarity = 0.90
         self.currently_highlighted_term = None
@@ -15,7 +15,7 @@ class Navigator:
 
     def start(self):
         #image = self._take_screenshot()
-        #self.results = self.ocr_engine_instance.run_ocr(image)
+        self.ocr_results = self.ocr_engine_instance.get_ocr_results('placeholder.png')
 
         self.gui_instance = self.current_gui.initialize()
         self.gui_instance.add_callback("search_term_change", self._search_term_changed) 
@@ -60,14 +60,13 @@ class Navigator:
         return possible_matches
 
     def _search_term_changed(self):
-        print("Matching...")
         current_search_term = self.gui_instance.get_search_term()
         if not current_search_term.strip(): return
-        ocr_results = self.ocr_engine_instance.get_ocr_results('placeholder.png')
-        #ocr_results = [("kissa", [100, 200]), ("koira", [200, 300])]
         # For now, assuming that the data is ready
         
-        possible_matches = self._match_term_to_results(current_search_term, ocr_results)
+        possible_matches_contains = self._match_term_to_results(current_search_term, self.ocr_results)
+        possible_matches_lev = self._match_term_to_results_with_levenshtein(current_search_term, self.ocr_results)
+        possible_matches = possible_matches_contains + possible_matches_lev
         # TODO: remember current position and allow passing through different matches
         print(possible_matches)
         if possible_matches:
