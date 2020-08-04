@@ -1,6 +1,6 @@
 from gui.wxpython_gui import WxPythonGUI
 from ocr.tesseract import TesseractEngine
-import tkinter as tk
+import pyscreenshot as ImageGrab
 import editdistance
 
 class Navigator:
@@ -14,8 +14,8 @@ class Navigator:
         pass
 
     def start(self):
-        #image = self._take_screenshot()
-        self.ocr_results = self.ocr_engine_instance.get_ocr_results('placeholder.png')
+        image_path = self._take_screenshot()
+        self.ocr_results = self.ocr_engine_instance.get_ocr_results(image_path)
 
         self.gui_instance = self.current_gui.initialize()
         self.gui_instance.add_callback("search_term_change", self._search_term_changed) 
@@ -26,7 +26,8 @@ class Navigator:
         """
         Called when user signals that they want the mouse to click the currently highlighted term.
         """
-        print("Clicking: ", self.currently_highlighted_term)
+        if self.currently_highlighted_term:
+            print("Clicking: ", self.currently_highlighted_term)
         self.gui_instance.exit()
 
     def _match_term_to_results_with_levenshtein(self, current_search_term, ocr_results):
@@ -41,7 +42,6 @@ class Navigator:
             ocr_result_word = result[0]
             distance = editdistance.eval(current_search_term, ocr_result_word)
             similarity = 1 - distance / max(len(ocr_result_word), len(current_search_term)) 
-            print(similarity)
             if similarity > self.minimum_word_similarity:
                 possible_matches.append(result)
 
@@ -63,27 +63,29 @@ class Navigator:
         current_search_term = self.gui_instance.get_search_term()
         if not current_search_term.strip(): return
         # For now, assuming that the data is ready
-        
         possible_matches_contains = self._match_term_to_results(current_search_term, self.ocr_results)
         possible_matches_lev = self._match_term_to_results_with_levenshtein(current_search_term, self.ocr_results)
         possible_matches = possible_matches_contains + possible_matches_lev
         # TODO: remember current position and allow passing through different matches
-        print(possible_matches)
         if possible_matches:
+            print(current_search_term)
             self.currently_highlighted_term = possible_matches[0]
             self.gui_instance.highlight_term(possible_matches[0])
-            
-                
+        else:
+            self.gui_instance.remove_highlights()
+
     def _take_screenshot(self):
         """
         Takes a screenshot of current screen.
         """
         # For now, loading a placeholder image.
-        image = open("placeholder.png", "rb").read()
-        return image
+        im = ImageGrab.grab()
+        im.save('crnt.png')
+        return 'crnt.png'
 
 if __name__ == "__main__":
     
     n = Navigator()
     n.start()
-    
+
+
