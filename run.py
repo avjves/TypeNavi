@@ -1,7 +1,10 @@
+import pyautogui
+import editdistance
+import pyscreenshot as ImageGrab
+import win32api, win32con
+
 from gui.wxpython_gui import WxPythonGUI
 from ocr.tesseract import TesseractEngine
-import pyscreenshot as ImageGrab
-import editdistance
 
 class Navigator:
 
@@ -27,8 +30,18 @@ class Navigator:
         Called when user signals that they want the mouse to click the currently highlighted term.
         """
         if self.currently_highlighted_term:
+            self.gui_instance.exit()
             print("Clicking: ", self.currently_highlighted_term)
-        self.gui_instance.exit()
+            # current_x, current_y = pyautogui.displayMousePosition()
+            x,y = self.currently_highlighted_term[1][0:2]
+            x, y = int(x), int(y)
+
+            win32api.SetCursorPos((x, y))
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+
 
     def _match_term_to_results_with_levenshtein(self, current_search_term, ocr_results):
         """
@@ -59,6 +72,7 @@ class Navigator:
                 possible_matches.append(result)
         return possible_matches
 
+
     def _search_term_changed(self):
         current_search_term = self.gui_instance.get_search_term()
         if not current_search_term.strip(): return
@@ -68,7 +82,6 @@ class Navigator:
         possible_matches = possible_matches_contains + possible_matches_lev
         # TODO: remember current position and allow passing through different matches
         if possible_matches:
-            print(current_search_term)
             self.currently_highlighted_term = possible_matches[0]
             self.gui_instance.highlight_term(possible_matches[0])
         else:
