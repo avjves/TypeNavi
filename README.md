@@ -1,7 +1,9 @@
-## Keyboard Navigation
+# TypeNavi
+Software to navigate desktop using just the keyboard.
 
-Used to navigate the desktop with just keyboard.
+Works by taking a screenshot of the current screen and runs it through a OCR engine to get all words and their locations. User inputs a search word, which is then highlighted on screen and pressing enter will then quick said word.
 
-# TODO:
-ALT + R takes a screenshot of current active window, then starts a new UI window for user to type what the want.
-The picture goes through a fast OCR software to get all the texts and their positions currently on screen. It then fuzzily matches the user inputted text to any text on screen. Current "selection" will be highlighted and and user can press it by pressing ENTER.
+MVP - Works, but missing lots of functionality.
+
+## Issues
+Current OCR technology is not fast / accurate enough for this to be fluid enough.
